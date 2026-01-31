@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RAG Frontend
 
-## Getting Started
+This frontend is a Next.js application for the RAG (Retrieval-Augmented Generation) system. It lets users add notes or URLs, list saved content, and ask questions that are answered from the knowledge base with cited sources.
 
-First, run the development server:
+## Project Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `app/`: Next.js App Router.
+  - `layout.tsx`: Root layout, fonts, and metadata.
+  - `page.tsx`: Main page; two-column layout (ingestion + chat).
+  - `globals.css`: Tailwind and theme variables.
+- `components/`: React components.
+  - `ui/`: shadcn UI primitives (Button, Card, Input, Textarea, Badge, ScrollArea, Alert).
+  - `ingestion/`: Add-knowledge card, saved-items list, memory-bank card.
+  - `chat/`: Chat panel, message bubble, and input.
+  - `common/`: Shared pieces (e.g. connection-error alert).
+- `hooks/`: Custom hooks for saved items and chat state.
+- `lib/`: Utilities and API client.
+  - `api.ts`: Backend API (ingest, list documents, query); uses `NEXT_PUBLIC_API_URL`.
+  - `utils.ts`: `cn()` and helpers.
+- `types/`: TypeScript types (e.g. `SavedItem`, `ChatMessage`).
+- `public/`: Static assets.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Design Decisions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Next.js**: The main page is a client component so it can use hooks and state.
+- **Modular Components**: Feature areas are split into `ingestion`, `chat`, and `common` with barrel exports, keeping the main page thin and components reusable.
+- **shadcn UI + Tailwind**: shadcn and Tailwind provide consistent, themeable UI and avoid one-off CSS; design tokens live in `globals.css`.
+- **Custom Hooks**: `useSavedItems` and `useChat` hold list/chat logic and API calls, so the page only composes layout and passes props.
+- **Fetch API**: Backend is called with `fetch` and `NEXT_PUBLIC_API_URL`; no extra HTTP client keeps dependencies small and aligns with the backend’s REST API.
+- **Viewport Layout**: The page uses a fixed viewport height and internal scrolling (e.g. Memory Bank list, chat messages) so the whole screen does not scroll.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Trade-offs
 
-## Learn More
+- **No Backend in Repo**: The frontend assumes the RAG backend is running and reachable at `NEXT_PUBLIC_API_URL`; running and deploying the backend is documented in the backend README.
+- **Client-Side API Calls**: All data is fetched from the client; for very high traffic or SEO needs, adding server-side or cached data would require route handlers or server components.
+- **Single-Page Layout**: The app is one main screen; adding more routes (e.g. settings, history) would require extending the App Router and navigation.
 
-To learn more about Next.js, take a look at the following resources:
+## Environment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL (no trailing slash). Default: `http://localhost:8000`. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `.env.local.example` for a template.
