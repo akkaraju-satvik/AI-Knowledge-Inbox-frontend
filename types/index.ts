@@ -5,3 +5,9 @@ export interface SavedItem {
   type: "url" | "text"
   created_at: string
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant"
+  content: string
+  sources?: string[]
+}
